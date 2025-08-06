@@ -90,8 +90,13 @@ st.markdown("""
         color: white;
         font-weight: bold;
     }
+    .stButton button:hover {
+        background-color: #110854;
+        color: white;
+    }
     </style>
 """, unsafe_allow_html=True)
+
 
 # Display logo
 logo_path = "CH_Primary.svg"
