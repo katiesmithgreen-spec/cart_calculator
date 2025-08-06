@@ -14,6 +14,11 @@ def car_t_financial_model(
     ntap_applies: bool = True,
     inpatient_los_days: int = 10,
     readmission_rate: float = 0.15
+    
+    st.markdown("### 📈 Volume-Based Impact Modeling")
+patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=25, step=1)
+outpatient_shift_pct = st.slider("% of Volume Shifted to Outpatient", 0, 100, 75, step=5)
+
 ):
     car_t_drug_cost = 373000
 
@@ -128,4 +133,12 @@ if st.button("Calculate"):
     ax.set_title('Margin Comparison: Inpatient vs Outpatient', fontsize=14)
     st.pyplot(fig)
 
+# Volume impact calculation
+shifted_patients = patient_volume * (outpatient_shift_pct / 100)
+total_impact = results['Net Improvement (Outpatient vs Inpatient)'] * shifted_patients
+
+st.markdown("---")
+st.subheader("📈 Volume-Adjusted Financial Impact")
+st.write(f"**Total Net Financial Impact for {int(shifted_patients)} Outpatient Patients:** ${total_impact:,.2f}")
+    
     st.success("Calculation and comparison chart generated successfully!")
