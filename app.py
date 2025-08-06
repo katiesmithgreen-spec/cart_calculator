@@ -35,9 +35,9 @@ def car_t_financial_model(
         medicare_share * reimbursement['Medicare']['Outpatient']
     )
 
-    facility_cost_per_day = {'Inpatient': 7500, 'Outpatient': 3000}
+    facility_cost_per_day = {'Inpatient': 10000, 'Outpatient': 3000}
     staffing_cost = {'Inpatient': 20000, 'Outpatient': 10000}
-    monitoring_followup = {'Inpatient': 0, 'Outpatient': 2000}
+    monitoring_followup = {'Inpatient': 0, 'Outpatient': 5500}
     readmission_cost = {
         'Inpatient': 10000 * readmission_rate,
         'Outpatient': 10000 * readmission_rate
@@ -132,7 +132,6 @@ if st.button("Calculate"):
     st.write(f"**Patients Shifted to Outpatient:** {int(shifted_patients)} ({outpatient_shift_pct}%)")
     st.write(f"**Estimated Total Net Financial Improvement:** ${new_total_margin - baseline_total_margin:,.2f}")
 
-    # Enhanced Chart with updated labels and padding
     fig, ax = plt.subplots(figsize=(6, 5))
     labels = ["All Inpatient", "Current Health Outpatient Model"]
     values = [baseline_total_margin, new_total_margin]
