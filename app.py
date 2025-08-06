@@ -14,6 +14,8 @@ def car_t_financial_model(
     ntap_applies: bool = True,
     inpatient_los_days: int = 10,
     readmission_rate: float = 0.15
+):
+
     
     st.markdown("### 📈 Volume-Based Impact Modeling")
 patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=25, step=1)
