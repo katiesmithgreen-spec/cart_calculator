@@ -9,7 +9,7 @@ from PIL import Image
 
 # --- CAR-T Financial Model ---
 def car_t_financial_model(
-    payer_mix: int = 50,
+    medicare_pct: int = 50,
     ntap_applies: bool = True,
     inpatient_los_days: int = 10,
     readmission_rate: float = 0.15
@@ -21,8 +21,8 @@ def car_t_financial_model(
         'Commercial': {'Inpatient': 550000, 'Outpatient': 500000}
     }
 
-    medicare_share = (100 - payer_mix) / 100
-    commercial_share = payer_mix / 100
+    medicare_share = medicare_pct / 100
+    commercial_share = 1 - medicare_share
 
     ntap_amount = 50000 if ntap_applies else 0
 
@@ -92,15 +92,10 @@ st.image("CH_Primary.svg", width=160)
 st.title("CAR-T Episode Financial Impact Calculator")
 st.markdown("Use this tool to compare inpatient vs outpatient margins for CAR-T therapy.")
 
-# Payer mix slider with labels
+# Payer mix slider (Medicare %)
 st.markdown("**Payer Mix**")
-col1, col2, col3 = st.columns([2, 6, 2])
-with col1:
-    st.write("Medicare")
-with col2:
-    payer_mix = st.slider("", 0, 100, 50)
-with col3:
-    st.write("Commercial")
+medicare_pct = st.slider("Percent Medicare Patients", 0, 100, 50)
+st.markdown(f"💰 **Payer Mix Breakdown:** {medicare_pct}% Medicare &nbsp;&nbsp;|&nbsp;&nbsp; {100 - medicare_pct}% Commercial")
 
 ntap = st.checkbox("NTAP Applies?", value=True)
 los = st.slider("Inpatient Length of Stay (days)", 5, 20, 10)
@@ -111,7 +106,7 @@ patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=500
 outpatient_shift_pct = st.slider("% of Volume Shifted to Outpatient", 0, 100, 75, step=5)
 
 if st.button("Calculate"):
-    results = car_t_financial_model(payer_mix, ntap, los, readmit_rate)
+    results = car_t_financial_model(medicare_pct, ntap, los, readmit_rate)
 
     st.subheader("📊 Per-Patient Margins")
     for key, value in results.items():
