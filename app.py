@@ -88,7 +88,16 @@ st.image("CH_Primary.svg", width=160)
 st.title("CAR-T Episode Financial Impact Calculator")
 st.markdown("Use this tool to compare inpatient vs outpatient margins for CAR-T therapy.")
 
-payer_mix = st.slider("Payer Mix (% Commercial)", 0, 100, 50)
+# Payer mix slider with labels
+st.markdown("**Payer Mix**")
+col1, col2, col3 = st.columns([1, 6, 1])
+with col1:
+    st.write("Medicare")
+with col2:
+    payer_mix = st.slider("", 0, 100, 50)
+with col3:
+    st.write("Commercial")
+
 ntap = st.checkbox("NTAP Applies?", value=True)
 los = st.slider("Inpatient Length of Stay (days)", 5, 20, 10)
 readmit_rate = st.slider("Readmission Rate", 0.0, 0.5, 0.15, step=0.01)
