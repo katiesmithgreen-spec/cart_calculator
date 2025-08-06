@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 
-# Load logo
 from PIL import Image
 
 # --- CAR-T Financial Model ---
@@ -18,25 +17,30 @@ def car_t_financial_model(
     car_t_drug_cost = 373000
 
     reimbursement = {
-        'Medicare': {'Inpatient': 450000 + (50000 if ntap_applies else 0), 'Outpatient': 430000},
-        'Commercial': {'Inpatient': 550000 + (50000 if ntap_applies else 0), 'Outpatient': 500000}
+        'Medicare': {'Inpatient': 450000, 'Outpatient': 430000},
+        'Commercial': {'Inpatient': 550000, 'Outpatient': 500000}
     }
 
+    medicare_share = (100 - payer_mix) / 100
+    commercial_share = payer_mix / 100
+
+    ntap_amount = 50000 if ntap_applies else 0
+
     inpatient_reimbursement = (
-        (payer_mix / 100) * reimbursement['Commercial']['Inpatient'] +
-        ((100 - payer_mix) / 100) * reimbursement['Medicare']['Inpatient']
+        commercial_share * reimbursement['Commercial']['Inpatient'] +
+        medicare_share * (reimbursement['Medicare']['Inpatient'] + ntap_amount)
     )
     outpatient_reimbursement = (
-        (payer_mix / 100) * reimbursement['Commercial']['Outpatient'] +
-        ((100 - payer_mix) / 100) * reimbursement['Medicare']['Outpatient']
+        commercial_share * reimbursement['Commercial']['Outpatient'] +
+        medicare_share * reimbursement['Medicare']['Outpatient']
     )
 
     facility_cost_per_day = {'Inpatient': 7500, 'Outpatient': 3000}
     staffing_cost = {'Inpatient': 20000, 'Outpatient': 10000}
-    monitoring_followup = {'Inpatient': 10000, 'Outpatient': 15000}
+    monitoring_followup = {'Inpatient': 0, 'Outpatient': 2000}
     readmission_cost = {
-        'Inpatient': 5000 * readmission_rate,
-        'Outpatient': 15000 * readmission_rate
+        'Inpatient': 10000 * readmission_rate,
+        'Outpatient': 10000 * readmission_rate
     }
 
     inpatient_facility_cost = inpatient_los_days * facility_cost_per_day['Inpatient']
