@@ -90,7 +90,7 @@ st.markdown("Use this tool to compare inpatient vs outpatient margins for CAR-T 
 
 # Payer mix slider with labels
 st.markdown("**Payer Mix**")
-col1, col2, col3 = st.columns([1, 6, 1])
+col1, col2, col3 = st.columns([2, 6, 2])
 with col1:
     st.write("Medicare")
 with col2:
