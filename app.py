@@ -1,3 +1,4 @@
+
 from typing import Literal
 import streamlit as st
 import matplotlib.pyplot as plt
@@ -6,7 +7,6 @@ matplotlib.use('Agg')
 
 # Load logo
 from PIL import Image
-import base64
 
 # --- CAR-T Financial Model ---
 def car_t_financial_model(
@@ -14,14 +14,6 @@ def car_t_financial_model(
     ntap_applies: bool = True,
     inpatient_los_days: int = 10,
     readmission_rate: float = 0.15
-):
-
-
-    
-    st.markdown("### 📈 Volume-Based Impact Modeling")
-patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=25, step=1)
-outpatient_shift_pct = st.slider("% of Volume Shifted to Outpatient", 0, 100, 75, step=5)
-
 ):
     car_t_drug_cost = 373000
 
@@ -105,10 +97,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
 # Display logo
-logo_path = "CH_Primary.svg"
-st.image(logo_path, width=160)
+st.image("CH_Primary.svg", width=160)
 
 st.title("CAR-T Episode Financial Impact Calculator")
 st.markdown("Use this tool to compare inpatient vs outpatient margins for CAR-T therapy.")
@@ -117,6 +107,10 @@ payer = st.selectbox("Select Payer Type", ["Medicare", "Commercial"])
 ntap = st.checkbox("NTAP Applies?", value=True)
 los = st.slider("Inpatient Length of Stay (days)", 5, 20, 10)
 readmit_rate = st.slider("Readmission Rate", 0.0, 0.5, 0.15, step=0.01)
+
+st.markdown("### 📈 Volume-Based Impact Modeling")
+patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=25, step=1)
+outpatient_shift_pct = st.slider("% of Volume Shifted to Outpatient", 0, 100, 75, step=5)
 
 if st.button("Calculate"):
     results = car_t_financial_model(payer, ntap, los, readmit_rate)
@@ -130,18 +124,17 @@ if st.button("Calculate"):
     margins = [results['Inpatient Margin'], results['Outpatient Margin']]
     labels = ['Inpatient', 'Outpatient']
     colors = ['#ffa400', '#5842ff']
-
     ax.bar(labels, margins, color=colors)
     ax.set_ylabel('Margin ($)', fontsize=12)
     ax.set_title('Margin Comparison: Inpatient vs Outpatient', fontsize=14)
     st.pyplot(fig)
 
-# Volume impact calculation
-shifted_patients = patient_volume * (outpatient_shift_pct / 100)
-total_impact = results['Net Improvement (Outpatient vs Inpatient)'] * shifted_patients
+    # Volume impact calculation
+    shifted_patients = patient_volume * (outpatient_shift_pct / 100)
+    total_impact = results['Net Improvement (Outpatient vs Inpatient)'] * shifted_patients
 
-st.markdown("---")
-st.subheader("📈 Volume-Adjusted Financial Impact")
-st.write(f"**Total Net Financial Impact for {int(shifted_patients)} Outpatient Patients:** ${total_impact:,.2f}")
-    
+    st.markdown("---")
+    st.subheader("📈 Volume-Adjusted Financial Impact")
+    st.write(f"**Total Net Financial Impact for {int(shifted_patients)} Outpatient Patients:** ${total_impact:,.2f}")
+
     st.success("Calculation and comparison chart generated successfully!")
