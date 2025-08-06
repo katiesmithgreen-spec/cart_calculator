@@ -132,14 +132,17 @@ if st.button("Calculate"):
     st.write(f"**Patients Shifted to Outpatient:** {int(shifted_patients)} ({outpatient_shift_pct}%)")
     st.write(f"**Estimated Total Net Financial Improvement:** ${new_total_margin - baseline_total_margin:,.2f}")
 
-    # Chart
+    # Enhanced Chart
     fig, ax = plt.subplots()
     labels = ["All Inpatient", "Current Shift Model"]
     values = [baseline_total_margin, new_total_margin]
     colors = ['#ccc', '#5842ff']
     ax.bar(labels, values, color=colors)
-    ax.set_ylabel("Total Margin ($)", fontsize=12)
-    ax.set_title("Total Margin Impact: Inpatient vs Shift Model", fontsize=14)
-    st.pyplot(fig)
+    ax.set_ylabel("Total Annual Margin ($)", fontsize=12)
+    ax.set_title("Estimated Total Annual Margin: Inpatient vs Shifted Model", fontsize=14)
 
+    for i, v in enumerate(values):
+        ax.text(i, v + (0.02 * max(values)), f"${v:,.0f}", ha='center', va='bottom', fontsize=10)
+
+    st.pyplot(fig)
     st.success("Calculation and volume comparison chart generated successfully!")
