@@ -11,7 +11,7 @@ import base64
 
 # --- CAR-T Financial Model ---
 
-def car\_t\_financial\_model(
+def car_t_financial_model(
 payer\_type: Literal\['Medicare', 'Commercial'] = 'Medicare',
 ntap\_applies: bool = True,
 inpatient\_los\_days: int = 10,
