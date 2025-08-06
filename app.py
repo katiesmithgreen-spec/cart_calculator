@@ -121,7 +121,7 @@ if st.button("Calculate"):
     fig, ax = plt.subplots()
     margins = [results['Inpatient Margin'], results['Outpatient Margin']]
     labels = ['Inpatient', 'Outpatient']
-    colors = ['#c44d56', '#5842ff']
+    colors = ['#ffa400', '#5842ff']
 
     ax.bar(labels, margins, color=colors)
     ax.set_ylabel('Margin ($)', fontsize=12)
