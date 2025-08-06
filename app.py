@@ -109,7 +109,7 @@ los = st.slider("Inpatient Length of Stay (days)", 5, 20, 10)
 readmit_rate = st.slider("Readmission Rate", 0.0, 0.5, 0.15, step=0.01)
 
 st.markdown("### 📈 Volume-Based Impact Modeling")
-patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=25, step=1)
+patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=500, step=1)
 outpatient_shift_pct = st.slider("% of Volume Shifted to Outpatient", 0, 100, 75, step=5)
 
 if st.button("Calculate"):
@@ -135,6 +135,8 @@ if st.button("Calculate"):
 
     st.markdown("---")
     st.subheader("📈 Volume-Adjusted Financial Impact")
-    st.write(f"**Total Net Financial Impact for {int(shifted_patients)} Outpatient Patients:** ${total_impact:,.2f}")
+    st.write(f"**Annual Volume:** {patient_volume} patients")
+    st.write(f"**Patients Shifted to Outpatient:** {int(shifted_patients)} ({outpatient_shift_pct}%)")
+    st.write(f"**Estimated Total Net Financial Improvement:** ${total_impact:,.2f}")
 
     st.success("Calculation and comparison chart generated successfully!")
