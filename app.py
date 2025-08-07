@@ -41,11 +41,11 @@ def car_t_financial_model(
     outpatient_margin = outpatient_reimbursement - outpatient_cost
     amortized_outpatient_margin = outpatient_margin - (implementation_fee / patient_volume)
 
-    # Inpatient Margin Range
+    # Inpatient Margin (tightened range)
     def margin_range():
-        facility = (10000, 25000)
-        staffing = (15000, 35000)
-        services = (6000, 20000)
+        facility = (15000, 22000)
+        staffing = (20000, 30000)
+        services = (8000, 15000)
         readmit = 10000 * readmission_rate
 
         low_cost = car_t_drug_cost + facility[0] + staffing[0] + services[0] + readmit
@@ -57,12 +57,13 @@ def car_t_financial_model(
         )
 
     inpatient_margin_low, inpatient_margin_high = margin_range()
+    inpatient_margin_avg = (inpatient_margin_low + inpatient_margin_high) / 2
 
     shifted = patient_volume * (outpatient_shift_pct / 100)
     remaining = patient_volume - shifted
 
-    # Anchor against conservative inpatient baseline
-    baseline = inpatient_margin_low * patient_volume
+    # Anchor against average inpatient baseline
+    baseline = inpatient_margin_avg * patient_volume
 
     new_low = (inpatient_margin_low * remaining) + (amortized_outpatient_margin * shifted)
     new_high = (inpatient_margin_high * remaining) + (amortized_outpatient_margin * shifted)
@@ -116,4 +117,4 @@ if st.button("Calculate Impact"):
     """, unsafe_allow_html=True)
 
     st.markdown(f"Based on shifting **{int(shifted_patients)}** of **{total_volume}** patients to outpatient care.")
-
+    st.markdown("Includes amortized $75,000 implementation fee and tighter cost assumptions.")
