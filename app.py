@@ -61,15 +61,16 @@ def car_t_financial_model(
     shifted = patient_volume * (outpatient_shift_pct / 100)
     remaining = patient_volume - shifted
 
-    baseline_low = inpatient_margin_low * patient_volume
-    baseline_high = inpatient_margin_high * patient_volume
+    # Anchor against conservative inpatient baseline
+    baseline = inpatient_margin_low * patient_volume
+
     new_low = (inpatient_margin_low * remaining) + (amortized_outpatient_margin * shifted)
     new_high = (inpatient_margin_high * remaining) + (amortized_outpatient_margin * shifted)
 
-    improvement_low = new_low - baseline_low
-    improvement_high = new_high - baseline_high
+    improvement_low = new_low - baseline
+    improvement_high = new_high - baseline
 
-    return improvement_low, improvement_high
+    return improvement_low, improvement_high, shifted, patient_volume
 
 # --- UI ---
 st.set_page_config(page_title="CAR-T Financial Calculator", page_icon="🧬", layout="centered")
@@ -105,7 +106,7 @@ volume = st.number_input("Annual Patient Volume", min_value=1, value=500)
 shift = st.slider("% of Volume Shifted to Outpatient", 0, 100, 75, step=5)
 
 if st.button("Calculate Impact"):
-    low, high = car_t_financial_model(medicare_pct, los, readmit_rate, volume, shift)
+    low, high, shifted_patients, total_volume = car_t_financial_model(medicare_pct, los, readmit_rate, volume, shift)
 
     st.markdown("### 💰 Estimated Annual Financial Improvement")
     st.markdown(f"""
@@ -114,5 +115,5 @@ if st.button("Calculate Impact"):
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"Based on shifting **{int(volume * shift / 100)}** of **{volume}** patients to outpatient care.")
+    st.markdown(f"Based on shifting **{int(shifted_patients)}** of **{total_volume}** patients to outpatient care.")
     st.markdown("Includes amortized $75,000 implementation fee and updated cost assumptions.")
