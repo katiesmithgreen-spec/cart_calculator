@@ -43,7 +43,7 @@ shift_pct = st.slider("Percent Shifted to Outpatient", 0, 100, 75)
 shifted_patients = round(patient_volume * shift_pct / 100)
 impact_low = 2100000
 impact_high = 6700000
-impact_range_str = f"$ {impact_low:,.0f} - $ {impact_high:,.0f}"
+impact_range_str = f"${{impact_low:,.0f}} - ${{impact_high:,.0f}}"
 
 if st.button("See Impact"):
     st.session_state.show_results = True
@@ -51,11 +51,11 @@ if st.button("See Impact"):
 if st.session_state.show_results:
     st.subheader("Your Estimated Financial Impact with Current Health:")
     st.markdown(f'''
-- **Payer Mix:** {payer_mix}% Medicare  
-- **Patient Volume:** {patient_volume}  
-- **Outpatient Shift:** {shifted_patients} of {patient_volume} patients ({shift_pct}%)  
+- **Payer Mix:** {{payer_mix}}% Medicare  
+- **Patient Volume:** {{patient_volume}}  
+- **Outpatient Shift:** {{shifted_patients}} of {{patient_volume}} patients ({{shift_pct}}%)  
 - **Estimated Financial Improvement:**  
-  <div class='big-number'>{impact_range_str}</div>
+  <div class='big-number'>${{impact_low:,.0f}} - ${{impact_high:,.0f}}</div>
 ''', unsafe_allow_html=True)
 
     # Generate personalized PDF
@@ -67,12 +67,12 @@ if st.session_state.show_results:
     flowables = [
         Paragraph("Your CAR-T Care Episode Impact Estimate", styles['CenterTitle']),
         Spacer(1, 20),
-        Paragraph(f"<b>Payer Mix:</b> {payer_mix}% Medicare", styles['Normal']),
-        Paragraph(f"<b>Annual Volume:</b> {patient_volume}", styles['Normal']),
-        Paragraph(f"<b>Outpatient Shift:</b> {shifted_patients} of {patient_volume} ({shift_pct}%)", styles['Normal']),
+        Paragraph(f"<b>Payer Mix:</b> {{payer_mix}}% Medicare", styles['Normal']),
+        Paragraph(f"<b>Annual Volume:</b> {{patient_volume}}", styles['Normal']),
+        Paragraph(f"<b>Outpatient Shift:</b> {{shifted_patients}} of {{patient_volume}} ({{shift_pct}}%)", styles['Normal']),
         Spacer(1, 10),
         Paragraph(f"<b>Estimated Financial Improvement:</b>", styles['Normal']),
-        Paragraph(f"<font size=14 color='#5842ff'><b>{impact_range_str}</b></font>", styles['Normal']),
+        Paragraph(f"<font size=14 color='#5842ff'><b>${{impact_low:,.0f}} - ${{impact_high:,.0f}}</b></font>", styles['Normal']),
         Spacer(1, 20),
         Paragraph("Generated on: " + datetime.date.today().strftime("%B %d, %Y"), styles['Normal'])
     ]
