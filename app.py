@@ -19,6 +19,12 @@ st.markdown("""
             background-color: #110854;
             color: white;
         }
+        .big-number {
+            font-size: 28px;
+            color: #5842ff;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -37,7 +43,7 @@ shift_pct = st.slider("Percent Shifted to Outpatient", 0, 100, 75)
 shifted_patients = round(patient_volume * shift_pct / 100)
 impact_low = 2100000
 impact_high = 6700000
-impact_range_str = f"${impact_low:,} to ${impact_high:,}"
+impact_range_str = f"$ {impact_low:,.0f} - $ {impact_high:,.0f}"
 
 if st.button("See Impact"):
     st.session_state.show_results = True
@@ -49,7 +55,7 @@ if st.session_state.show_results:
 - **Patient Volume:** {patient_volume}  
 - **Outpatient Shift:** {shifted_patients} of {patient_volume} patients ({shift_pct}%)  
 - **Estimated Financial Improvement:**  
-  <span style='font-size: 28px; color: #5842ff'><b>{impact_range_str}</b></span>
+  <div class='big-number'>{impact_range_str}</div>
 ''', unsafe_allow_html=True)
 
     # Generate personalized PDF
