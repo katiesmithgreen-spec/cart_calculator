@@ -1,4 +1,2 @@
 streamlit
-matplotlib
-Pillow
-PyPDF2
+reportlab
