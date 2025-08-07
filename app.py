@@ -116,4 +116,4 @@ if st.button("Calculate Impact"):
     """, unsafe_allow_html=True)
 
     st.markdown(f"Based on shifting **{int(shifted_patients)}** of **{total_volume}** patients to outpatient care.")
-    st.markdown("Includes amortized $75,000 implementation fee and updated cost assumptions.")
+
