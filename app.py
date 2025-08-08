@@ -6,33 +6,41 @@ from PyPDF2 import PdfReader, PdfWriter
 # --- CONFIGURATION ---
 OUTPATIENT_COST_PER_PATIENT = 450 * 15 + 15000  # $6,750 for 15 days + $15,000 additional cost
 IMPLEMENTATION_FEE = 75000
+CAR_T_REIMBURSEMENT = 373000
 
-INPATIENT_MARGIN_LOW = -33000
-INPATIENT_MARGIN_MID = -20000
+# Inpatient margin assumptions
+inpatient_medicare_low = -40000
+inpatient_medicare_mid = -30000
+inpatient_commercial_low = -25000
+inpatient_commercial_mid = -15000
 
-# --- MAIN CALCULATOR FUNCTION ---
+# --- CALCULATION FUNCTION ---
 def calculate_impact(medicare_mix: int, volume: int, shift_pct: int) -> Tuple[int, int]:
-    outpatient_margin = 373000 - OUTPATIENT_COST_PER_PATIENT
-    shifted = round(volume * shift_pct / 100)
-    not_shifted = volume - shifted
-    outpatient_total_margin = (outpatient_margin * shifted) - IMPLEMENTATION_FEE
+    medicare_ratio = medicare_mix / 100
+    commercial_ratio = 1 - medicare_ratio
+    patients_shifted = round(volume * shift_pct / 100)
 
+    outpatient_cost = OUTPATIENT_COST_PER_PATIENT
+    outpatient_margin = CAR_T_REIMBURSEMENT - outpatient_cost
+
+    # Weighted inpatient margins
     inpatient_margin_low = (
-    payer_mix * inpatient_medicare_low +
-    commercial_mix * inpatient_commercial_low
-)
-
+        medicare_ratio * inpatient_medicare_low +
+        commercial_ratio * inpatient_commercial_low
+    )
     inpatient_margin_mid = (
-    payer_mix * inpatient_medicare_mid +
-    commercial_mix * inpatient_commercial_mid
-)
+        medicare_ratio * inpatient_medicare_mid +
+        commercial_ratio * inpatient_commercial_mid
+    )
 
+    # Margin delta per patient
+    delta_low = outpatient_margin - inpatient_margin_mid
+    delta_high = outpatient_margin - inpatient_margin_low
 
-    impact_low = (outpatient_margin - inpatient_margin_mid) * patients_shifted
-    impact_high = (outpatient_margin - inpatient_margin_low) * patients_shifted
+    impact_low = round(delta_low * patients_shifted - IMPLEMENTATION_FEE)
+    impact_high = round(delta_high * patients_shifted - IMPLEMENTATION_FEE)
 
-
-    return round(impact_low), round(impact_mid)
+    return impact_low, impact_high, patients_shifted
 
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="CAR-T Estimator", layout="centered")
@@ -44,33 +52,34 @@ volume = st.number_input("Annual CAR-T Patient Volume", min_value=1, value=500)
 shift_pct = st.slider("Percent of Volume Shifted to Outpatient", 0, 100, 75)
 
 if st.button("See Impact"):
-    impact_low, impact_mid = calculate_impact(medicare_mix, volume, shift_pct)
+    impact_low, impact_high, shifted = calculate_impact(medicare_mix, volume, shift_pct)
     st.markdown("### Your Estimated Financial Impact with Current Health:")
-    st.markdown(f"<h2 style='color:#5842ff;'>${impact_low:,} - ${impact_mid:,}</h2>", unsafe_allow_html=True)
+    st.markdown(
+        f"<h2 style='color:#5842ff;'>${impact_low:,} - ${impact_high:,}</h2>",
+        unsafe_allow_html=True
+    )
     st.markdown("<p style='color: gray;'>Range reflects shifting patients from a typical inpatient model to Current Health's outpatient episode.</p>", unsafe_allow_html=True)
 
-    # --- DOWNLOAD PDF BUTTON ---
     if st.button("Download My Estimate"):
-        template_path = "CAR-T_calculator_output3.pdf"
-        reader = PdfReader(template_path)
+        reader = PdfReader("CAR-T_calculator_output3.pdf")
         writer = PdfWriter()
         writer.append(reader.pages[0])
 
-        # Fill in the fields (update with actual field names in the PDF)
         writer.update_page_form_field_values(
             writer.pages[0],
             {
                 "payer_mix": f"{medicare_mix}%",
                 "volume": str(volume),
-                "shifted": f"{round(volume * shift_pct / 100)}",
-                "range": f"${impact_low:,} - ${impact_mid:,}",
-            },
+                "shifted": str(shifted),
+                "range": f"${impact_low:,} - ${impact_high:,}",
+            }
         )
+
         output_pdf = BytesIO()
         writer.write(output_pdf)
         st.download_button(
-            label="Download My Estimate",
+            label="⬇️ Download My Estimate",
             data=output_pdf.getvalue(),
             file_name="CAR-T_Impact_Estimate.pdf",
-            mime="application/pdf",
+            mime="application/pdf"
         )
