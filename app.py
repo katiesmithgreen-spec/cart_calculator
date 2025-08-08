@@ -22,7 +22,7 @@ def calculate_impact(medicare_mix: int, volume: int, shift_pct: int) -> Tuple[in
     commercial_mix * inpatient_commercial_low
 )
 
-inpatient_margin_mid = (
+    inpatient_margin_mid = (
     payer_mix * inpatient_medicare_mid +
     commercial_mix * inpatient_commercial_mid
 )
