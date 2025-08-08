@@ -17,11 +17,20 @@ def calculate_impact(medicare_mix: int, volume: int, shift_pct: int) -> Tuple[in
     not_shifted = volume - shifted
     outpatient_total_margin = (outpatient_margin * shifted) - IMPLEMENTATION_FEE
 
-    inpatient_total_margin_low = not_shifted * INPATIENT_MARGIN_LOW
-    inpatient_total_margin_mid = not_shifted * INPATIENT_MARGIN_MID
+    inpatient_margin_low = (
+    payer_mix * inpatient_medicare_low +
+    commercial_mix * inpatient_commercial_low
+)
 
-    impact_low = outpatient_total_margin - inpatient_total_margin_low
-    impact_mid = outpatient_total_margin - inpatient_total_margin_mid
+inpatient_margin_mid = (
+    payer_mix * inpatient_medicare_mid +
+    commercial_mix * inpatient_commercial_mid
+)
+
+
+impact_low = (outpatient_margin - inpatient_margin_mid) * patients_shifted
+impact_high = (outpatient_margin - inpatient_margin_low) * patients_shifted
+
 
     return round(impact_low), round(impact_mid)
 
