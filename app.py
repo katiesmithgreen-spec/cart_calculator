@@ -6,7 +6,7 @@ from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from io import BytesIO
 
-# --- Styling ---
+# --- UI/Styling ---
 st.set_page_config(page_title="CAR-T Financial Calculator", layout="centered")
 st.markdown("""
     <style>
@@ -29,9 +29,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Logo
 st.image("CH_Primary.png", width=160)
-
 st.title("CAR-T Episode Financial Impact Calculator")
 
 # --- Input Fields ---
@@ -39,47 +37,56 @@ payer_mix = st.slider("Payer Mix (% Medicare)", 0, 100, 62)
 patient_volume = st.number_input("Annual Patient Volume", min_value=1, value=500)
 shift_pct = st.slider("Percent Shifted to Outpatient", 0, 100, 75)
 
-# --- Financial Constants ---
-reimbursement = {
-    "Medicare": {"Inpatient": 450000, "Outpatient": 430000},
-    "Commercial": {"Inpatient": 550000, "Outpatient": 500000}
-}
-
-# Cost estimates
-inpatient_cost_range = (31000, 80000)  # low, high
-outpatient_monitoring_cost = 450 * 15 + 75000  # Daily cost * 15 + implementation
-outpatient_other = 15000
-outpatient_total = outpatient_monitoring_cost + outpatient_other
-
-# Margin Calculations
-def blended_margin(pct_medicare, site, inpatient_cost=None):
-    if site == "Outpatient":
-        margin_medicare = reimbursement["Medicare"][site] - outpatient_total
-        margin_commercial = reimbursement["Commercial"][site] - outpatient_total
-    else:
-        margin_medicare = reimbursement["Medicare"][site] - inpatient_cost
-        margin_commercial = reimbursement["Commercial"][site] - inpatient_cost
-    return ((pct_medicare / 100) * margin_medicare +
-            ((100 - pct_medicare) / 100) * margin_commercial)
-
-shifted = round(patient_volume * shift_pct / 100)
-low_margin_diff = blended_margin(payer_mix, "Outpatient") - blended_margin(payer_mix, "Inpatient", inpatient_cost_range[1])
-high_margin_diff = blended_margin(payer_mix, "Outpatient") - blended_margin(payer_mix, "Inpatient", inpatient_cost_range[0])
-impact_low = round(shifted * low_margin_diff)
-impact_high = round(shifted * high_margin_diff)
-
-# --- Display Results ---
 if st.button("See Impact"):
-    st.subheader("Your Estimated Financial Impact with Current Health:")
-    st.markdown(f"""
-    **Payer Mix:** {payer_mix}% Medicare  
-    **Patient Volume:** {patient_volume}  
-    **Shifted to Outpatient:** {shifted} patients  
-    **Estimated Financial Improvement:**  
-    <div class='big-number'>${impact_low:,.0f} - ${impact_high:,.0f}</div>
-    """, unsafe_allow_html=True)
 
-    # --- PDF Output ---
+    # Reimbursement assumptions
+    reimbursement = {
+        "Medicare": {"Inpatient": 450000, "Outpatient": 430000},
+        "Commercial": {"Inpatient": 550000, "Outpatient": 500000}
+    }
+
+    # Outpatient cost model
+    outpatient_monitoring_cost = 450 * 15 + 75000
+    outpatient_other = 15000
+    outpatient_total = outpatient_monitoring_cost + outpatient_other
+
+    # Inpatient cost range
+    inpatient_low = 31000
+    inpatient_high = 80000
+
+    # Calculate margins
+    def blended_margin(pct_medicare, site, cost=None):
+        if site == "Outpatient":
+            m_margin = reimbursement["Medicare"][site] - outpatient_total
+            c_margin = reimbursement["Commercial"][site] - outpatient_total
+        else:
+            m_margin = reimbursement["Medicare"][site] - cost
+            c_margin = reimbursement["Commercial"][site] - cost
+        return (pct_medicare / 100) * m_margin + (1 - pct_medicare / 100) * c_margin
+
+    # Calculate outputs
+    shifted = round(patient_volume * shift_pct / 100)
+    blended_out_margin = blended_margin(payer_mix, "Outpatient")
+    margin_low = blended_margin(payer_mix, "Inpatient", inpatient_high)
+    margin_high = blended_margin(payer_mix, "Inpatient", inpatient_low)
+
+    impact_low = round(shifted * (blended_out_margin - margin_low))
+    impact_high = round(shifted * (blended_out_margin - margin_high))
+
+    impact_range_str = f"${impact_low:,.0f} - ${impact_high:,.0f}"
+
+    # Output
+    st.subheader("Your Estimated Financial Impact with Current Health:")
+    st.markdown(f"<div class='big-number'>{impact_range_str}</div>", unsafe_allow_html=True)
+
+    # DEBUG
+    st.write("Debug - Inputs:")
+    st.write(f"Payer Mix: {payer_mix}, Volume: {patient_volume}, Shifted: {shifted}")
+    st.write(f"Outpatient Margin: {blended_out_margin:,.0f}")
+    st.write(f"Inpatient Margin Range: {margin_low:,.0f} to {margin_high:,.0f}")
+    st.write(f"Impact Range: {impact_low:,.0f} to {impact_high:,.0f}")
+
+    # PDF Export
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=LETTER)
     styles = getSampleStyleSheet()
@@ -93,11 +100,10 @@ if st.button("See Impact"):
         Paragraph(f"Outpatient Shift: {shifted} of {patient_volume} ({shift_pct}%)", styles['Normal']),
         Spacer(1, 10),
         Paragraph("Estimated Financial Improvement:", styles['Normal']),
-        Paragraph(f"<font size=14 color='#5842ff'><b>${impact_low:,.0f} - ${impact_high:,.0f}</b></font>", styles['Normal']),
+        Paragraph(f"<font size=14 color='#5842ff'><b>{impact_range_str}</b></font>", styles['Normal']),
         Spacer(1, 20),
         Paragraph("Generated on: " + datetime.date.today().strftime("%B %d, %Y"), styles['Normal'])
     ]
-
     doc.build(flowables)
     buffer.seek(0)
 
