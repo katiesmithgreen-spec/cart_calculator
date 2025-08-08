@@ -79,15 +79,16 @@ if st.button("See Impact"):
     with open(pdf_template_path, "rb") as f:
         reader = PdfReader(f)
         writer = PdfWriter()
-        writer.append(reader.pages[0])
+        page = reader.pages[0]
+writer.add_page(page)
+writer.update_page_form_field_values(writer.pages[0], {
+    "payer_mix": f"{payer_mix_percent}%",
+    "volume": f"{volume}",
+    "shift_pct": f"{shift_pct}%",
+    "impact_low": f"${impact_low:,.0f}",
+    "impact_high": f"${impact_high:,.0f}",
+})
 
-        writer.update_page_form_field_values(writer.pages[0], {
-            "payer_mix": f"{payer_mix_percent}%",
-            "volume": f"{volume}",
-            "shift_pct": f"{shift_pct}%",
-            "impact_low": f"${impact_low:,.0f}",
-            "impact_high": f"${impact_high:,.0f}",
-        })
 
         output_pdf = BytesIO()
         writer.write(output_pdf)
