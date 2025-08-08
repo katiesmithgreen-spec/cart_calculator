@@ -90,9 +90,9 @@ writer.update_page_form_field_values(writer.pages[0], {
 })
 
 
-        output_pdf = BytesIO()
-        writer.write(output_pdf)
-        output_pdf.seek(0)
+    output_pdf = BytesIO()
+    writer.write(output_pdf)
+    output_pdf.seek(0)
 
     # Generate download
     b64_pdf = base64.b64encode(output_pdf.read()).decode("utf-8")
