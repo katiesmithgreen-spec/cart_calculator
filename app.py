@@ -4,24 +4,30 @@ from io import BytesIO
 from PyPDF2 import PdfReader, PdfWriter
 
 # --- CONFIGURATION ---
-OUTPATIENT_COST_PER_PATIENT = 450 * 15 + 15000  # $6,750 for 15 days + $15,000 additional cost
-IMPLEMENTATION_FEE = 75000
-CAR_T_REIMBURSEMENT = 373000
+DRUG_COST = 373000
+INPATIENT_REIMBURSEMENT = 498723
+OUTPATIENT_REIMBURSEMENT = 414393
 
-# Inpatient margin assumptions
+INPATIENT_NONDRUG_REIMBURSEMENT = INPATIENT_REIMBURSEMENT - DRUG_COST  # $125,723
+OUTPATIENT_NONDRUG_REIMBURSEMENT = OUTPATIENT_REIMBURSEMENT - DRUG_COST  # $41,393
+
+OUTPATIENT_COST = 450 * 15 + 15000  # Monitoring + extra services
+IMPLEMENTATION_FEE = 75000
+
+# Inpatient margin assumptions (non-drug)
 inpatient_medicare_low = -40000
 inpatient_medicare_mid = -30000
 inpatient_commercial_low = -25000
 inpatient_commercial_mid = -15000
 
 # --- CALCULATION FUNCTION ---
-def calculate_impact(medicare_mix: int, volume: int, shift_pct: int) -> Tuple[int, int]:
+def calculate_impact(medicare_mix: int, volume: int, shift_pct: int) -> Tuple[int, int, int]:
     medicare_ratio = medicare_mix / 100
     commercial_ratio = 1 - medicare_ratio
     patients_shifted = round(volume * shift_pct / 100)
 
-    outpatient_cost = OUTPATIENT_COST_PER_PATIENT
-    outpatient_margin = CAR_T_REIMBURSEMENT - outpatient_cost
+    # New outpatient margin from real Medicare data
+    outpatient_margin = OUTPATIENT_NONDRUG_REIMBURSEMENT - OUTPATIENT_COST
 
     # Weighted inpatient margins
     inpatient_margin_low = (
@@ -33,7 +39,6 @@ def calculate_impact(medicare_mix: int, volume: int, shift_pct: int) -> Tuple[in
         commercial_ratio * inpatient_commercial_mid
     )
 
-    # Margin delta per patient
     delta_low = outpatient_margin - inpatient_margin_mid
     delta_high = outpatient_margin - inpatient_margin_low
 
