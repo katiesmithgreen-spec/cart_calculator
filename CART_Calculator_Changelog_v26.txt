@@ -1,0 +1,20 @@
+# CAR-T Calculator Version v26
+
+**Release Timestamp**: 2025-08-08 01:05:55
+
+## 🔧 Fixes & Updates
+
+### 1. Improved Modeling Accuracy
+- Rebalanced outpatient margin calculation.
+- Adjusted inpatient margin *low-end* to reflect realistic provider feedback (often negative margins).
+- Corrected formula for implementation fee amortization across volume.
+- Tightened control over NTAP and payer mix adjustments.
+
+### 2. UI Fixes
+- Removed debug output from final interface.
+- Cleaned up spacing and formatting in financial impact output.
+- Ensured consistent font styling and dollar symbol formatting.
+
+### 3. Functional Stability
+- Ensured calculations re-run correctly after each input change.
+- Verified synchronization between input values and PDF download.
