@@ -32,7 +32,7 @@ impact_low = (outpatient_margin - inpatient_margin_mid) * patients_shifted
 impact_high = (outpatient_margin - inpatient_margin_low) * patients_shifted
 
 
-    return round(impact_low), round(impact_mid)
+return round(impact_low), round(impact_mid)
 
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="CAR-T Estimator", layout="centered")
